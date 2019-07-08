@@ -47,9 +47,12 @@ namespace Unifish
                 if (Input.GetKeyDown(KeyCode.Return))
                 {
                     //Call input
-                    Log(data.inputText.text);
-                    data.inputText.text = "";
+                    Console.instance.ParseCommand(data.inputText.text);
+                    
                 }
+
+                if (Input.GetKeyUp(KeyCode.Return))
+                    data.inputText.text = "";
             }
         }
     }

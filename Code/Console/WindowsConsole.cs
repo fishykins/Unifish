@@ -14,6 +14,7 @@ namespace Unifish
         public void Initialize()
         {
             windowsInput = new WindowsConsoleInput();
+            windowsInput.OnInputText += Console.instance.ParseCommand;
         }
 
         public void Log(string message) => HandleLog(message, "", LogType.Log);

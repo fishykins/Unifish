@@ -4,6 +4,10 @@ using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Microsoft.Scripting.Hosting;
+using Exodrifter.UnityPython;
+using System.Collections;
+using IronPython.Hosting;
 
 namespace Unifish
 {
@@ -12,15 +16,30 @@ namespace Unifish
         public static Console instance;
         private IConsole console;
 
+        public static bool IsOpen { get { return instance.console.IsActive; } }
+
+        public delegate void ConsoleCommand(string message);
+        private Dictionary<string, ConsoleCommand> consoleCommands = new Dictionary<string, ConsoleCommand>();
+
         [Header("Python Commands")]
-        public bool python = true;
-        public String[] assemblies = new string[0];
+        [SerializeField]
+        private bool usePython = true;
+        [SerializeField]
+        private String[] assemblies = { "Unifish" };
+        [SerializeField]
+        private string pythonTag = "py";
+
+        private ScriptEngine pythonEngine;
+        private ScriptScope pythonScope;
 
         private void Awake()
         {
             if (instance != null) return;
 
             instance = this;
+            pythonEngine = UnityPython.CreateEngine(assemblies);
+            pythonScope = pythonEngine.CreateScope();
+
 
 #if UNITY_SERVER
             console = new WindowsConsole();
@@ -30,12 +49,18 @@ namespace Unifish
 #endif
 
             Application.logMessageReceived += console.HandleLog;
+            AddCommand("Help", ShowHelp);
         }
 
         private void Start()
         {
             console.Initialize();
             Log(StringFormatter.WrapHeader("Unifish Console Initiated"));
+
+            string code = "import UnityEngine\nUnityEngine.Debug.Log('IronPython initiated')";
+
+            var source = pythonEngine.CreateScriptSourceFromString(code);
+            source.Execute(pythonScope);
         }
 
         public void Update()
@@ -53,12 +78,48 @@ namespace Unifish
         /// <param name="command"></param>
         public void ParseCommand(string command)
         {
+            string[] stringArray = command.Split(null);
+            if (stringArray.Length == 0 || stringArray == null)
+            {
+                LogError("Command '" + command + "' is a bit broken");
+                return;
+            }
 
+            string type = stringArray[0].ToLower();
+            string arg = (stringArray.Length >= 2) ? command.Substring(pythonTag.Length + 1) : "";
+
+            if (type == pythonTag && usePython && pythonEngine != null)
+            {
+                Log("Parsing '" + arg + "' as Python...");
+                var source = pythonEngine.CreateScriptSourceFromString(arg);
+                source.Execute(pythonScope);
+            }
+            else
+            {
+                if (consoleCommands.TryGetValue(type, out ConsoleCommand comm))
+                {
+                    comm.Invoke(arg);
+                }
+                else
+                {
+                    Log("No command for '" + type + "' was found");
+                }
+            }
         }
 
-        public void AddCommand()
+        public static void AddCommand(string name, ConsoleCommand command)
         {
+            name = name.ToLower();
+            if (!instance.consoleCommands.ContainsKey(name))
+                instance.consoleCommands.Add(name, command);
+        }
 
+        private void ShowHelp(string arg)
+        {
+            foreach (var command in instance.consoleCommands)
+            {
+                Log("--" + command.Key);
+            }
         }
     }
 }

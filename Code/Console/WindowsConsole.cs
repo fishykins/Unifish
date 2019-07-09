@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Unifish
 {
-    public class WindowsConsole : IConsole
+    public class WindowsConsole : IConsoleGui
     {
         private WindowsConsoleInput windowsInput;
 

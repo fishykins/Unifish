@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Unifish
 {
-    public interface IConsole
+    public interface IConsoleGui
     {
         bool IsActive { get; }
 

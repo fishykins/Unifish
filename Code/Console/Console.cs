@@ -14,7 +14,7 @@ namespace Unifish
     public class Console : MonoBehaviour
     {
         public static Console instance;
-        private IConsole console;
+        private IConsoleGui console;
 
         public static bool IsOpen { get { return instance.console.IsActive; } }
 
@@ -49,7 +49,6 @@ namespace Unifish
 #endif
 
             Application.logMessageReceived += console.HandleLog;
-            AddCommand("Help", ShowHelp);
         }
 
         private void Start()
@@ -86,7 +85,7 @@ namespace Unifish
             }
 
             string type = stringArray[0].ToLower();
-            string arg = (stringArray.Length >= 2) ? command.Substring(pythonTag.Length + 1) : "";
+            string arg = (stringArray.Length >= 2) ? command.Substring(type.Length + 1) : "";
 
             if (type == pythonTag && usePython && pythonEngine != null)
             {
@@ -114,11 +113,11 @@ namespace Unifish
                 instance.consoleCommands.Add(name, command);
         }
 
-        private void ShowHelp(string arg)
+        public void ShowHelp(string arg)
         {
-            foreach (var command in instance.consoleCommands)
+            foreach (var command in Console.instance.consoleCommands)
             {
-                Log("--" + command.Key);
+                Console.Log("--" + command.Key);
             }
         }
     }

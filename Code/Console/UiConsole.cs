@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Unifish
 {
-    public class UiConsole : IConsole
+    public class UiConsole : IConsoleGui
     {
         private UiConsoleData data;
 

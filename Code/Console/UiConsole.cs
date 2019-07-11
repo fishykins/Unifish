@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+#if UNIFISH_NEWINPUT
+using UnityEngine.InputSystem;
+#endif
+
 
 namespace Unifish
 {
@@ -17,8 +21,24 @@ namespace Unifish
 
             if (data == null) Debug.LogError("UiConsoleData not found!");
 
-            data.consoleCanvas.gameObject.SetActive(false);
+            SetActive(false);
+
+#if UNIFISH_NEWINPUT
+            data.toggleConsole.performed += ToggleConsole;
+#endif
         }
+
+#if UNIFISH_NEWINPUT
+        private void HitEnter(InputAction.CallbackContext context)
+        {
+            Console.instance.ParseCommand(data.inputText.text);
+        }
+
+        private void ToggleConsole(InputAction.CallbackContext context)
+        {
+            SetActive(!IsActive);
+        }
+#endif
 
         public void Log(string message) => AddTextToGameConsole(message);
         public void LogWarning(string message) => AddTextToGameConsole(message);
@@ -38,14 +58,25 @@ namespace Unifish
         public void SetActive(bool active = true)
         {
             data.consoleCanvas.gameObject.SetActive(active);
+
+#if UNIFISH_NEWINPUT
+            if (active)
+                data.enterKey.performed += HitEnter;
+            else
+                data.enterKey.performed -= HitEnter;
+#endif
         }
+
+
 
         public void Update()
         {
 
-            #if UNIFISH_NEWINPUT
+#if UNIFISH_NEWINPUT
             //Use the new input system
-            #else
+#else
+
+            //Old Input system
             if (Input.GetKeyDown(KeyCode.F1))
             {
                 SetActive(!IsActive);
@@ -63,7 +94,7 @@ namespace Unifish
                 if (Input.GetKeyUp(KeyCode.Return))
                     data.inputText.text = "";
             }
-            #endif
+#endif
         }
     }
 

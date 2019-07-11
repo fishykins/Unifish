@@ -43,6 +43,10 @@ namespace Unifish
         {
             windowsInput.Update();
         }
+
+        public void SetActive(bool active = true) {
+            
+        }
     }
 
 }

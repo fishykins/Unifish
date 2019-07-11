@@ -14,7 +14,7 @@ namespace Unifish
         public void Initialize()
         {
             data = Console.instance.GetComponent<UiConsoleData>();
-            
+
             if (data == null) Debug.LogError("UiConsoleData not found!");
 
             data.consoleCanvas.gameObject.SetActive(false);
@@ -35,11 +35,20 @@ namespace Unifish
             data.scrollRect.verticalNormalizedPosition = 0f;
         }
 
+        public void SetActive(bool active = true)
+        {
+            data.consoleCanvas.gameObject.SetActive(active);
+        }
+
         public void Update()
         {
+
+            #if UNIFISH_NEWINPUT
+            //Use the new input system
+            #else
             if (Input.GetKeyDown(KeyCode.F1))
             {
-                data.consoleCanvas.gameObject.SetActive(!IsActive);
+                SetActive(!IsActive);
             }
 
             if (IsActive)
@@ -48,12 +57,13 @@ namespace Unifish
                 {
                     //Call input
                     Console.instance.ParseCommand(data.inputText.text);
-                    
+
                 }
 
                 if (Input.GetKeyUp(KeyCode.Return))
                     data.inputText.text = "";
             }
+            #endif
         }
     }
 

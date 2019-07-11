@@ -14,6 +14,8 @@ namespace Unifish
         void LogError(string message);
         void HandleLog(string message, string stackTrace, LogType type);
 
+        void SetActive(bool active = true);
+
         void Update();
     }
 

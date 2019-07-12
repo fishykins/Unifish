@@ -49,8 +49,9 @@ namespace Unifish
             AddTextToGameConsole(message);
         }
 
-        public void AddTextToGameConsole(string message)
+        private void AddTextToGameConsole(string message)
         {
+            if (data is null) return;
             data.consoletext.text += message + "\n";
             data.scrollRect.verticalNormalizedPosition = 0f;
         }
